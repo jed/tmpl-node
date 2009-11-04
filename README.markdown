@@ -22,11 +22,13 @@ You can render templates with multiple contexts, which will all be combined into
 
 You can also load templates in batch from a folder like this:
 
-    tmpl.load("./myTemplates/")
+    tmpl.load("./myTemplates/", /^[^\.]/ )
 
 which creates a named template for each file. So if the folder had a file named `page.html`, you could render its contents like this:
 
     tmpl[ "page.html" ]({ title: "Welcome!" })
+
+The second argument of this function is an optional RegExp filter. Only files whose names match the expression are loaded.
 
 Since this is probably the most useful for rendering server responses, the method `render` is added to the `ServerResponse` object, so that you can create handlers like this:
 
