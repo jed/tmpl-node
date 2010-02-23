@@ -1,6 +1,8 @@
 tmpl-node.js
 ============
 
+NOTE: This library is out of date with the current node.js API. I'm no longer using it, so please fork n' fix, and I'll pull the changes!
+
 `tmpl-node` is a template module for [node.js](http://nodejs.org/), based on John Resig's approach to [micro-templating](http://ejohn.org/blog/javascript-micro-templating/). It's a lightweight way to add templating to any `node.js` app.
 
 To start, require the library in your app:
