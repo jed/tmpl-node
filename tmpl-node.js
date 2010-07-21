@@ -1,19 +1,20 @@
 // tmpl-node: a template module for node.js
-// Jed Schmidt - http://jedschmidt.com/
+// Jed Schmidt - 
 // 
 // inspired by John Resig's micro templates
 // http://ejohn.org/blog/javascript-micro-templating/
 
-var posix = require( "posix" ),
+var fs = require( "fs" ),
     http = require( "http" ),
     concat = Array.prototype.concat,
-    slice = Array.prototype.slice;
+    slice = Array.prototype.slice,
+    sys = require('sys');
 
-process.mixin( exports, {
-  compile: compile,
-  load: load,
-  defaultContexts: []
-});
+
+exports.compile = compile;
+exports.load = load;
+exports.defaultContexts = [];
+
 
 http.ServerResponse.prototype.render = function( name, c1, c2, etc ) {
   var args = Array.prototype.slice.call( arguments ),
@@ -38,6 +39,7 @@ function compile( str, name ) {
   
   function ret() {
     var args = concat.apply( exports.defaultContexts, arguments ),
+      x = -1,
       i = args.length,
       context = {},
       name,
@@ -46,8 +48,8 @@ function compile( str, name ) {
     if ( i < 2 )
       return fn( args[0] || context );
       
-    while ( i )
-      for ( name in ( cur = args[ --i ] ) )
+    while ( x<i )
+      for ( name in ( cur = args[ ++x ] ) )
         context[ name ] = cur[ name ];
         
     return fn( context );
@@ -59,22 +61,22 @@ function compile( str, name ) {
   return ret;
 };
 
-function load( dir, pattern ) {
-  var promise = new process.Promise();
-
-  posix.readdir( dir ).addCallback( function( files ) {
-    var count = files.length;    
-    files.forEach( function( name ) {
-      if ( pattern && !pattern.test( name ) )
-        return --count;
-
-      posix.cat( dir + name ).addCallback( function( contents ) {
-        compile( contents, name );
-        if ( !--count )
-          promise.emitSuccess();
-      })
-    });
-  });
+function load( dir, call ) {
+  var foo = {};
+  dir = dir.split('');
+  ( dir[dir.length-1] === '/' )||( dir.push('/') );
+  dir = dir.join('');
   
-  return promise;
+  fs.readdir(dir,function(err,dat){
+    var x;
+
+    (function walker(){
+      x = dat.pop();
+      fs.readFile(dir + x, function(e,data){
+        exports[x] = compile(data.toString());
+        ( ( dat.length ) && ( walker() ) ) || ( call(exports) );
+      });
+      return true;
+    }());
+  });
 };
